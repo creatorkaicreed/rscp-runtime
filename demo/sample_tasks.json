@@ -1,0 +1,31 @@
+[
+  {
+    "task_id": "TASK-001",
+    "agent_id": "claims_agent",
+    "namespace": "claims",
+    "goal": "Validate claim record against policy",
+    "prefix": "claim_validation",
+    "query": "Check claim id 100005 and policy consistency",
+    "expected_fields": {
+      "state": "pending_review"
+    }
+  },
+  {
+    "task_id": "TASK-002",
+    "agent_id": "policy_agent",
+    "namespace": "claims",
+    "goal": "Check policy rule and amount",
+    "prefix": "policy_check",
+    "query": "Validate amount and policy code for claim review",
+    "expected_fields": {}
+  },
+  {
+    "task_id": "TASK-003",
+    "agent_id": "audit_agent",
+    "namespace": "claims",
+    "goal": "Review structured transaction evidence",
+    "prefix": "audit_review",
+    "query": "Summarize audit-relevant claim fields",
+    "expected_fields": {}
+  }
+]

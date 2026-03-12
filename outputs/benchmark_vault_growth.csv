@@ -1,0 +1,4 @@
+vault_size,tasks,workers,avg_latency_s,verified_rate,avg_admitted_cards,avg_focus_chars,prefix_hit_rate
+100,100,6,0.0566,1.0,3.0,381.17,0.94
+1000,100,6,0.0569,1.0,3.0,383.73,0.94
+10000,100,6,0.0588,1.0,3.0,387.08,0.94
