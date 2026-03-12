@@ -8,6 +8,7 @@ from collections import Counter
 
 sys.path.append(os.path.dirname(os.path.dirname(__file__)))
 
+from runtime.prefix_librarian import PrefixLibrarian
 from runtime.scheduler import RuntimeScheduler, ScheduledTask
 
 
@@ -16,10 +17,10 @@ DEFAULT_AGENTS = 50
 DEFAULT_FOCUS_FRAME_TARGET = 380
 
 PREFIXES = [
-    "policy_check",
-    "compliance_review",
-    "risk_assessment",
-    "claims_verification",
+    ("policy_check", "Insurance policy validation"),
+    ("compliance_review", "Regulatory compliance audit"),
+    ("risk_assessment", "Risk evaluation logic"),
+    ("claims_verification", "Claims processing verification"),
 ]
 
 CARDS = [
@@ -30,22 +31,25 @@ CARDS = [
 ]
 
 
-def build_tasks(agent_count: int) -> tuple[list[ScheduledTask], Counter[str]]:
+def build_tasks(agent_count: int, librarian: PrefixLibrarian) -> tuple[list[ScheduledTask], Counter[str]]:
     tasks: list[ScheduledTask] = []
     prefix_counter: Counter[str] = Counter()
 
     for agent in range(agent_count):
-        prefix = random.choice(PREFIXES)
+        prefix_name, _ = random.choice(PREFIXES)
         card = random.choice(CARDS)
+
+        # Acquire the reasoning program from the librarian
+        librarian.acquire(prefix_name)
 
         tasks.append(
             ScheduledTask(
                 agent_id=agent,
-                prefix=prefix,
+                prefix=prefix_name,
                 card=card,
             )
         )
-        prefix_counter[prefix] += 1
+        prefix_counter[prefix_name] += 1
 
     return tasks, prefix_counter
 
@@ -57,12 +61,17 @@ def run_simulation(agent_count: int, worker_count: int, focus_frame_target: int)
     print(f"Focus Frame Target: ~{focus_frame_target} chars")
     print("=" * 88)
 
-    tasks, prefix_counter = build_tasks(agent_count)
+    librarian = PrefixLibrarian()
+    for name, desc in PREFIXES:
+        librarian.register(name, desc)
+
+    tasks, prefix_counter = build_tasks(agent_count, librarian)
 
     scheduler = RuntimeScheduler(
         worker_count=worker_count,
         focus_frame_target=focus_frame_target,
     )
+
     scheduler.submit_tasks(tasks)
     scheduler.run()
 
@@ -71,6 +80,8 @@ def run_simulation(agent_count: int, worker_count: int, focus_frame_target: int)
     print("\nSimulation complete.")
     print("=" * 88)
     print("Runtime Summary")
+    print(f"Runtime Seconds: {stats['runtime_seconds']}")
+    print(f"Simulated Tasks / Second: {stats['tasks_per_second']}")
     print(f"Agents: {agent_count}")
     print(f"Workers: {stats['workers']}")
     print(f"Completed Tasks: {stats['completed_tasks']}")
@@ -86,6 +97,11 @@ def run_simulation(agent_count: int, worker_count: int, focus_frame_target: int)
     print("-" * 88)
     for prefix, count in prefix_counter.most_common():
         print(f"{prefix:<22} {count:>4}")
+
+    print("\nPrefix Librarian Usage")
+    print("-" * 88)
+    for name, count in librarian.stats().items():
+        print(f"{name:<22} {count:>4}")
 
 
 def parse_args() -> argparse.Namespace:
