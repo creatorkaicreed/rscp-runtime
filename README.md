@@ -98,6 +98,16 @@ Verifies reasoning determinism.
 
 ---
 
+Vault
+   ↓
+Librarian
+   ↓
+Prefix Cache
+   ↓
+Focus Frame
+   ↓
+Reasoning Envelope
+
 ## Demo Modes
 
 ### 1. Basic Demo
