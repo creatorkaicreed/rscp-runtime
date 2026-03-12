@@ -1,145 +1,211 @@
-RSCP Runtime (Reference Prototype)
+README.md
+# RSCP Runtime
+### Bounded Reasoning Memory for Scalable Multi-Agent AI
 
-This repository contains a minimal reference implementation of the Reasoning State Control Plane (RSCP) runtime architecture.
+RSCP (Reasoning-Scoped Context Protocol) is a reference prototype demonstrating how AI systems can operate with **bounded active reasoning** while retrieving knowledge from large external stores.
 
-RSCP introduces a new way to manage reasoning memory in AI systems by separating active reasoning state from external knowledge storage.
+The prototype shows how reasoning context can remain constant even as stored knowledge grows — preventing the common **prompt explosion problem** seen in many AI pipelines.
 
-Instead of expanding prompt context indefinitely, RSCP maintains a bounded reasoning envelope and retrieves only the evidence required for each reasoning step.
+---
 
-This converts reasoning memory into a managed runtime resource, similar to how operating systems manage process memory.
+## The Problem
 
-Core Concepts
+Most AI systems scale knowledge by adding more context into the prompt.
 
-RSCP runtime executes reasoning tasks using four core components:
+As knowledge grows:
 
-Bounded Reasoning Envelope (L1)
+- prompt size increases
+- latency increases
+- memory usage increases
+- token cost increases
 
-Active reasoning state is constrained to a fixed focus frame.
+This creates **prompt explosion**, where reasoning context grows linearly (or worse) with stored knowledge.
 
-Example:
+---
 
-Focus Frame Size: ~380 chars
+## The RSCP Idea
 
-This prevents prompt context explosion as knowledge grows.
+RSCP separates:
 
-Evidence Vault (L2)
+**Active Reasoning**  
+from  
+**Stored Knowledge**
 
-External knowledge is stored outside the reasoning envelope and admitted only when required.
+Instead of loading all information into the prompt, the system:
 
-Example runtime output:
+1. selects a **reasoning prefix program**
+2. retrieves a small **evidence card**
+3. constructs a bounded **focus frame**
 
-Evidence Card Loaded: transaction_data
-Vault Source: evidence_vault
-Prefix Programs
+The reasoning envelope remains **constant size**.
 
-Reasoning tasks reuse structured reasoning programs.
 
-Example prefixes:
+Vault → Librarian → Evidence Card → Focus Frame → Reasoning
 
-policy_check
-compliance_review
-risk_assessment
-claims_verification
 
-Prefix reuse enables high cache locality and improves multi-agent throughput.
+This prototype demonstrates the control-plane architecture required to support this model.
 
-Deterministic Verification
+---
 
-Each reasoning step may optionally pass through a verification layer.
+## Repository Structure
 
-Example:
 
-Oracle Verification: OK
-Example Runtime Output
-TASK 22
-Worker: 2
-Reasoning Envelope: [bounded]
-Reasoning Prefix: policy_check
-Evidence Card Loaded: customer_history
-Vault Source: evidence_vault
-Focus Frame Size: 378 chars
-PREFIX CACHE HIT
-Oracle Verification: OK
-Prompt Explosion vs RSCP
+runtime/
+focus_frame.py
+prefix_cache.py
+librarian.py
+oracle.py
+vault.py
 
-Runtime experiments demonstrate the difference between traditional prompt accumulation and RSCP bounded reasoning.
+demo/
+run_demo.py
+multi_agent_sim.py
+benchmark_prompt_vs_rscp.py
+benchmark_vault_growth.py
+plot_prompt_vs_rscp.py
 
-Vault Size	Naive Latency	Naive Context	RSCP Latency	RSCP Context
-100	0.0539s	1,270 chars	0.0565s	381 chars
-1000	0.2848s	12,790 chars	0.0569s	383 chars
-10000	2.6099s	128,890 chars	0.0594s	383 chars
+outputs/
+benchmark_prompt_vs_rscp.csv
+benchmark_vault_growth.csv
 
-Key observation:
+WhitePaper/
+RSCP White Paper.pdf
 
-Naive prompt context grows with stored knowledge.
-RSCP reasoning context remains bounded while latency stays nearly constant.
+config.py
+main.py
+run_all_demos.py
+requirements.txt
 
-Running the Demo
 
-Install dependencies:
+---
 
-python -m pip install -r requirements.txt
+## Core Components
 
-Run the demo:
+### Vault
+Stores knowledge cards (external evidence storage).
+
+### Librarian
+Selects the correct evidence card for a reasoning task.
+
+### Prefix Cache
+Stores reusable reasoning programs.
+
+### Focus Frame
+Constructs the bounded reasoning context.
+
+### Oracle
+Verifies reasoning determinism.
+
+---
+
+## Demo Modes
+
+### 1. Basic Demo
+
 
 python demo/run_demo.py
-White Paper
 
-The architecture is described in the RSCP white paper:
 
-RSCP — Bounded Reasoning Memory for Scalable Multi-Agent AI Systems
+Runs a deterministic reasoning pipeline with evidence retrieval.
 
-Research Goal
+---
 
-RSCP explores a new runtime model where reasoning memory is treated as a first-class system resource, enabling:
+### 2. Multi-Agent Simulation
 
-• higher multi-agent density
-• stable inference latency
-• scalable knowledge vaults
-• reliable reasoning pipelines
 
-Multi-Agent Runtime Simulation
+python demo/multi_agent_sim.py
 
-RSCP allows many agents to operate concurrently while maintaining bounded reasoning memory.
 
-Example simulation output:
+Simulates many agents executing reasoning tasks while sharing prefix programs.
 
-Agent 07 | Worker 2 | Prefix compliance_review | Card policy_rule | Focus ~380 chars
-Agent 08 | Worker 3 | Prefix risk_assessment | Card customer_history | Focus ~380 chars
-Agent 09 | Worker 4 | Prefix risk_assessment | Card customer_history | Focus ~380 chars
+Example output:
 
-Agent 22 | Worker 5 | Prefix claims_verification | Card transaction_data | Focus ~378 chars | CACHE HIT
-Agent 23 | Worker 6 | Prefix policy_check | Card customer_history | Focus ~386 chars | CACHE HIT
-Agent 24 | Worker 1 | Prefix compliance_review | Card transaction_data | Focus ~374 chars | CACHE HIT
 
-Simulation summary:
+Agent 42 | Worker 3 | Prefix policy_check | Card customer_history | Focus ~380 chars | CACHE HIT
 
-Agents: 50
-Workers: 6
-Distinct Prefix Programs: 4
-Prefix Cache Hit Rate: 92%
-Focus Frame Target: ~380 chars
-Evidence Source: external vault
-Reasoning Envelope: bounded
 
-Even as agent count increases, the active reasoning context remains constant.
+---
 
-Status
+### 3. Benchmark – Prompt Explosion
 
-This repository currently contains a minimal prototype runtime used for architectural exploration.
 
-Future work includes:
+python demo/benchmark_prompt_vs_rscp.py
 
-• concurrent worker scheduling
-• GPU-aware prefix caching
-• distributed vault systems
-• edge-runtime deployments
+
+Compares naive prompt context with RSCP bounded reasoning.
+
+Results are written to:
+
+
+outputs/benchmark_prompt_vs_rscp.csv
+
+
+---
+
+### 4. Vault Growth Benchmark
+
+
+python demo/benchmark_vault_growth.py
+
+
+Tests how reasoning context scales as the knowledge vault grows.
+
+---
+
+### 5. Plot Results
+
+
+python demo/plot_prompt_vs_rscp.py
+
+
+Generates the comparison graph:
+
+**Prompt Explosion vs Bounded Reasoning**
+
+---
+
+## Example Result
+
+As vault size grows:
+
+| Vault Size | Naive Prompt | RSCP |
+|-------------|-------------|------|
+| 100 | 1,270 chars | ~380 chars |
+| 1,000 | 12,790 chars | ~380 chars |
+| 10,000 | 128,890 chars | ~380 chars |
+
+This demonstrates the **constant reasoning envelope** property.
+
+---
+
+## Why This Matters
+
+Bounded reasoning architectures could enable:
+
+- scalable multi-agent AI systems
+- lower inference cost
+- reduced latency
+- deterministic reasoning pipelines
+- large external knowledge stores without prompt explosion
+
+---
+
+## Status
+
+This repository is a **research prototype** demonstrating the RSCP control-plane architecture.
+
+It is not yet integrated with a production LLM runtime.
+
+---
+
+## License
+
+Apache 2.0
 
 Author
 
 Graeme Randle
 RusticLabs
-Patent Pending
 
 How to run
 Run it from the repo root with:
