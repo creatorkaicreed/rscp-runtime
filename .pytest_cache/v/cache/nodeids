@@ -1,6 +1,0 @@
-[
-  "tests/test_correctness.py::test_error_mode_halts",
-  "tests/test_correctness.py::test_flappy_mode_not_hair_trigger",
-  "tests/test_correctness.py::test_flappy_mode_not_immediate_hair_trigger",
-  "tests/test_correctness.py::test_ok_mode_does_not_halt"
-]
