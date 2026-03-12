@@ -1,0 +1,3 @@
+{
+  "tests/test_correctness.py::test_flappy_mode_not_hair_trigger": true
+}
