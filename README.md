@@ -5,6 +5,8 @@ README.md
 RSCP (Reasoning-Scoped Context Protocol) is a reference prototype demonstrating how AI systems can operate with **bounded active reasoning** while retrieving knowledge from large external stores.
 
 The prototype shows how reasoning context can remain constant even as stored knowledge grows — preventing the common **prompt explosion problem** seen in many AI pipelines.
+
+
 <img width="2365" height="1514" alt="prompt_vs_rscp" src="https://github.com/user-attachments/assets/7e067a2f-a4d8-4304-bb0e-1fc7496e2692" />
 
 ---
