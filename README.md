@@ -208,7 +208,20 @@ Bounded reasoning architectures could enable:
 This repository is a **research prototype** demonstrating the RSCP control-plane architecture.
 
 It is not yet integrated with a production LLM runtime.
+RSCP Runtime (Research Prototype)
 
+This repository contains an early research prototype demonstrating the
+RSCP (Reasoning State Control Plane) architecture described in the RSCP
+whitepaper.
+
+The prototype illustrates bounded reasoning envelopes, external evidence
+memory, and controlled reasoning admission.
+
+It is intended as a minimal reference implementation for experimentation.
+
+The production RSCP runtime kernel, scheduling architecture, and memory
+governance mechanisms described in the whitepaper are under active
+development.
 ---
 
 ## License
